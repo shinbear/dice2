@@ -1,0 +1,10 @@
+/Connection$Base.class
+/Connection$KeyVal.class
+/Connection$Method.class
+/Connection$Request.class
+/Connection$Response.class
+/Connection.class
+/HttpStatusException.class
+/Jsoup.class
+/UnsupportedMimeTypeException.class
+/package-info.class
