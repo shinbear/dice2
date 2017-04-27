@@ -177,7 +177,7 @@ public class Main6 {
 		} else if (engine.equals("googleSearch")) {
 			/*
 			 * URL = "https://www.google.com/search?q=allintitle:\"" +
-			 * unedname.replace(" ", "+") + "\"+OR+allinurl:\"" +
+			 * unedname.replace(" ", "+") + "\"+OR+allinurl:\"aaaaa" +
 			 * unedname.replace(" ", "+") + "\"";
 			 */
 			URL = "https://www.google.com/search?q=mit+allintitle:(" + unedname + ")+OR+allinurl:(" + unedname + ")";
