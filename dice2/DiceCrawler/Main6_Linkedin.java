@@ -1,109 +1,70 @@
 package DiceCrawler;
 
 import java.awt.GridLayout;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.JComboBox;
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.DomNodeList;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-import com.mysql.jdbc.PreparedStatement;
-import com.mysql.jdbc.Statement;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-
-import jxl.*;
-import jxl.Workbook;
-import jxl.format.UnderlineStyle;
-import jxl.write.DateFormat;
-import jxl.write.DateTime;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.Boolean;
-import jxl.write.NumberFormat;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.File;
-import jxl.*;
-import jxl.Workbook;
-import jxl.format.UnderlineStyle;
-import jxl.write.DateFormat;
-import jxl.write.DateTime;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.Boolean;
-import jxl.write.NumberFormat;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.htmlparser.Parser;
-import org.htmlparser.filters.TagNameFilter;
-import org.htmlparser.tags.LinkTag;
-import org.htmlparser.util.NodeList;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.apache.commons.io.FileUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-public class Main6T_linkedin {
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
+import jxl.Cell;
+import jxl.CellType;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+
+public class Main6_Linkedin {
 	public static int Sub_ID = 0;
 	public static int Excel_ID = 0;
 	public static int Excel_ID_linkedin = 0;
 	public static int rawID = 1;
 	public static String cliuid_2 = "";
 	public static String unedname = "";
+	public static String fname = "";
+	public static String lname = "";
 	public static String labname = "";
 	public static String search_method = "";
 	public static int rawID_Total = 0;
@@ -144,7 +105,7 @@ public class Main6T_linkedin {
 
 				book = Workbook.getWorkbook(new File(filename.getText()));
 				sheet = book.getSheet(0);
-				// modifyExcel("C:/postdoc/result.xls","¸Ä¹ý",0,0);
+				// modifyExcel("C:/postdoc/result.xls","Modified",0,0);
 
 				rawID_Total = sheet.getRows(); // »ñÈ¡ÐÐÊý
 				webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER_11);// ´´½¨WebClient
@@ -172,7 +133,7 @@ public class Main6T_linkedin {
 					} catch (java.lang.IllegalArgumentException e) {
 						e.printStackTrace();
 					} finally {
-						int rTime = ((int) (20 + Math.random() * (50 - 20 + 1))) * 1000;
+						int rTime = ((int) (60 + Math.random() * (80 - 60 + 1))) * 1000;
 						try {
 							Thread.sleep(rTime);
 						} catch (InterruptedException e1) {
@@ -206,27 +167,30 @@ public class Main6T_linkedin {
 			bingSearch(URL, unedname);
 			flag = 1;
 		} else if (engine.equals("googleSearch")) {
-			URL = "https://www.google.com/search?q=site:linkedin.com+intitle:" + unedname.replace(" ", "%20")
-					+ "+OR+inurl:" + unedname.replace(" ", "%20");
+			URL = "https://www.google.com/search?q=linkedin+MIT+intitle:(" + unedname + ")+OR+inurl:(" + unedname + ")";
+			URL url = new URL(URL);
+			URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), null);
 
 			cliuid_2_unedname = str_trim.substring(0, 4 - cliuid_2.length()) + cliuid_2 + "_" + unedname;
 			// dirName = "c:/postdoc/" + cliuid_2_unedname;
 			// createDir(dirName);
 			System.out.println(URL);
-			googleSearch(URL, unedname);
+			googleSearch(uri.toString(), unedname);
+
 			if (Excel_ID == 0) {
-				int rTime = ((int) (20 + Math.random() * (50 - 20 + 1))) * 1000;
+				int rTime = ((int) (60 + Math.random() * (80 - 60 + 1))) * 1000;
 				try {
 					Thread.sleep(rTime);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
+				} catch (InterruptedException e1) { // TODO Auto-generated catch
+													// // block
 					e1.printStackTrace();
 				}
-				URL = "https://www.google.com/search?q=site:linkedin.com+intitle:" + unedname.replace(" ", "%20")
-						+ "+OR+inurl:" + unedname.replace(" ", "%20");
-				googleSearch(URL, unedname);
-				flag = 2;
+				URL = "https://www.google.com/search?q=linkedin+" + labname + "intitle:(" + unedname + ")+OR+inurl:("
+						+ unedname + ")";
+				googleSearch(uri.toString(), unedname);
 			}
+
+			flag = 2;
 		} else if (engine.equals("linkedinSearch")) {
 			URL = "https://www.linkedin.com/search/results/index/?keywords=" + unedname
 					+ "&origin=GLOBAL_SEARCH_HEADER";
@@ -479,9 +443,19 @@ public class Main6T_linkedin {
 				// iMatch method to check if including sensitive content
 				System.out.println("normalewebpage- " + URL);
 
+				boolean iFunctionMatch2 = iFunctionMatch2(str);
 				boolean iFunctionMatch3 = iFunctionMatch3(str, labname);
 				////////////
-				if (iFunctionMatch3) {
+				if (iFunctionMatch2) {
+					if (!excel_row.contains(URL)) {
+						// write the result into xls
+						modifyExcel("C:/postdoc/result.xls", URL, 3 + Excel_ID, rawID);
+						// writefile(filePath(""), doc.toString(), false);
+						excel_row.add(URL);
+						Sub_ID++;
+						Excel_ID++;
+					}
+				} else if (iFunctionMatch3) {
 					if (!excel_row.contains(URL)) {
 						// write the result into xls
 						modifyExcel("C:/postdoc/result.xls", URL, 3 + Excel_ID, rawID);
@@ -491,50 +465,52 @@ public class Main6T_linkedin {
 						Excel_ID++;
 					}
 
-					Elements links = body.getElementsByTag("a");
-					for (Element link : links) {
-						String regEx = "(download\\s*CV)|(download\\s*C.V.)|resume|CV|C.V.|(View/Download C.V.)|(Curriculum Vitae)";
-						// ±àÒëÕýÔò±í´ïÊ½-ºöÂÔ´óÐ¡Ð´µÄÐ´·¨
-						Pattern pattern = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE);
-						Matcher matcher = pattern.matcher(link.text());
-						while (matcher.find()) {
-							String linkHref = link.attr("href");
+				}
 
-							if (linkHref.substring((linkHref.length() - 4), linkHref.length()).equals(".pdf")) {
-								// Check if it is a relative path
-								linkHref = processDLURL(URL, linkHref);
+				Elements links = body.getElementsByTag("a");
+				for (Element link : links) {
+					String regEx = "(download\\s*CV)|(download\\s*C.V.)|resume|CV|C.V.|(View/Download C.V.)|(Curriculum Vitae)";
+					// ±àÒëÕýÔò±í´ïÊ½-ºöÂÔ´óÐ¡Ð´µÄÐ´·¨
+					Pattern pattern = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE);
+					Matcher matcher = pattern.matcher(link.text());
+					while (matcher.find()) {
+						String linkHref = link.attr("href");
 
-								// write log
-								ReadWriteFile.readTxtFile();
-								ReadWriteFile.writeTxtFile("          inner pdf- " + linkHref);
+						if (linkHref.substring((linkHref.length() - 4), linkHref.length()).equals(".pdf")) {
+							// Check if it is a relative path
+							linkHref = processDLURL(URL, linkHref);
 
-								url_temp = getDir() + "/"
-										+ linkHref.substring(linkHref.lastIndexOf("/") + 1, linkHref.length());
+							// write log
+							ReadWriteFile.readTxtFile();
+							ReadWriteFile.writeTxtFile("          inner pdf- " + linkHref);
 
-								String pdf_temp = "C:/postdoc/temp" + "/"
-										+ linkHref.substring(linkHref.lastIndexOf("/") + 1, linkHref.length());
+							url_temp = getDir() + "/"
+									+ linkHref.substring(linkHref.lastIndexOf("/") + 1, linkHref.length());
 
-								LoadSomething load = new LoadSomething();
-								DownloadTask downloadTask = new DownloadTask(linkHref, "C:/postdoc/temp");
-								// ¿ªÊ¼ÏÂÔØ£¬²¢Éè¶¨³¬Ê±ÏÞ¶îÎª3ºÁÃë
-								load.beginToLoad(downloadTask, 90000, TimeUnit.MILLISECONDS);
-								System.out.print("inner pdf- " + linkHref);
+							String pdf_temp = "C:/postdoc/temp" + "/"
+									+ linkHref.substring(linkHref.lastIndexOf("/") + 1, linkHref.length());
 
-								// read the content
-								String strContent = readPdf(pdf_temp);
+							LoadSomething load = new LoadSomething();
+							DownloadTask downloadTask = new DownloadTask(linkHref, "C:/postdoc/temp");
+							// ¿ªÊ¼ÏÂÔØ£¬²¢Éè¶¨³¬Ê±ÏÞ¶îÎª3ºÁÃë
+							load.beginToLoad(downloadTask, 90000, TimeUnit.MILLISECONDS);
+							System.out.print("inner pdf- " + linkHref);
 
-								// if the condition is satisfied, then keep the
-								// file OR delete
-								/// if (iFunctionMatch1(strContent)) {
-								/////////////////
-								if (iFunctionMatch1(strContent)) {
-									copyFile(pdf_temp, url_temp);
-								}
+							// read the content
+							String strContent = readPdf(pdf_temp);
+
+							// if the condition is satisfied, then keep the
+							// file OR delete
+							/// if (iFunctionMatch1(strContent)) {
+							/////////////////
+							if (iFunctionMatch1(strContent)) {
+								copyFile(pdf_temp, url_temp);
 							}
-
 						}
+
 					}
 				}
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -617,7 +593,7 @@ public class Main6T_linkedin {
 		}
 	}
 
-	// ÏòÎÄ±¾ÎÄ¼þÖÐÐ´ÈëÄÚÈÝ
+	// ?ò??±????t?DD′è??úèY
 	public static void writefile(String path, String content, boolean append) {
 		BufferedReader bufread;
 		BufferedWriter bufwriter;
@@ -732,21 +708,25 @@ public class Main6T_linkedin {
 	}
 
 	public static void readExcel(Sheet sheet, int rawID) {
-		Cell cell1, cell2, cell6;
+		Cell cell1, cell2, cell7, cell3, cell5;
 		// System.out.println("*****");
 		try {
 			// »ñÈ¡Ã¿Ò»ÐÐµÄµ¥Ôª¸ñ
 			cell1 = sheet.getCell(0, rawID);// £¨ÁÐ£¬ÐÐ£©
 			cell2 = sheet.getCell(1, rawID);
-			cell6 = sheet.getCell(6, rawID);
+			cell3 = sheet.getCell(2, rawID);
+			cell5 = sheet.getCell(4, rawID);
+			cell7 = sheet.getCell(6, rawID);
 
 			if ("".equals(cell1.getContents()) != true) // Èç¹û¶ÁÈ¡µÄÊý¾ÝÎª¿Õ
 			{
 				cliuid_2 = cell1.getContents();
 				unedname = cell2.getContents();
-				labname = cell6.getContents();
+				fname = cell3.getContents();
+				lname = cell5.getContents();
+				labname = cell7.getContents();
 				System.out.println(
-						rawID + " " + cell1.getContents() + " " + cell2.getContents() + " " + cell6.getContents());
+						rawID + " " + cell1.getContents() + " " + cell2.getContents() + " " + cell7.getContents());
 			}
 
 		} catch (Exception e) {
@@ -844,45 +824,60 @@ public class Main6T_linkedin {
 	public static boolean iContentMatch(String str) {
 		boolean iMatch = (str.toLowerCase().contains("background") || str.toLowerCase().contains("profile")
 				|| str.toLowerCase().contains("resume") || str.toLowerCase().contains("curriculum vitae")
-				|| str.toLowerCase().contains("cv") || str.toLowerCase().contains("biography"))
+				|| str.toLowerCase().contains(" cv ") || str.toLowerCase().contains("biography"))
 				&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
-						|| str.contains("MIT") || str.contains("M.I.T")
+						|| str.contains(" MIT ") || str.contains(" M.I.T ")
 						|| str.toLowerCase().contains("Massachusetts Institute of Technology")
 						|| str.toLowerCase().contains("biology"));
 		return iMatch;
 	}
 
+
 	public static boolean iFunctionMatch1(String str) {
 		boolean iMatch1 = (str.toLowerCase().contains("curriculum vitae") || str.toLowerCase().contains("resume")
 				|| str.contains("CV") || str.toLowerCase().contains("biography")
 				|| str.toLowerCase().contains("education"))
-				&& (str.contains("PhD") || str.contains("Ph.D"))
-				&& (str.toLowerCase().contains("Massachusetts Institute of Technology") || str.contains("MIT")
-						|| str.contains("M.I.T."))
-				&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
-						|| str.toLowerCase().contains("biology") || str.toLowerCase().contains("biological")
-						|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical"));
+				&& (str.contains("PhD") || str.contains("Ph.D") || str.toLowerCase().contains("doctor")
+						|| str.contains("M.D.") || str.toLowerCase().contains("postdoctoral")
+						|| str.toLowerCase().contains("postdoc"))
+				&& (str.toLowerCase().contains("massachusetts institute of technology") || str.contains("MIT,")
+						|| str.contains(",MIT") || str.contains("M.I.T.") || str.contains("MIT ")
+						|| str.toLowerCase().contains(labname.toLowerCase()) || str.toLowerCase().contains("whitehead")
+						|| str.toLowerCase().contains("mass inst technol"))
+				|| str.toLowerCase().contains("massachusetts institute of biology")
+						&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
+								|| str.toLowerCase().contains("biology") || str.toLowerCase().contains("biological")
+								|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical")
+								|| str.toLowerCase().contains("chemical") || str.toLowerCase().contains("cancer"));
 		return iMatch1;
 	}
 
 	public static boolean iFunctionMatch2(String str) {
-		boolean iMatch2 = (str.contains("PhD") || str.contains("Ph.D"))
-				&& (str.toLowerCase().contains("Massachusetts Institute of Technology") || str.contains("MIT")
-						|| str.contains("M.I.T."))
+		boolean iMatch2 = (str.contains("PhD") || str.contains("Ph.D") || str.toLowerCase().contains("doctor")
+				|| str.contains("M.D.") || str.toLowerCase().contains("postdoctoral")
+				|| str.toLowerCase().contains("postdoc"))
+				&& (str.toLowerCase().contains("massachusetts institute of technology") || str.contains(" MIT")
+						|| str.contains("M.I.T.") || str.contains("MIT ") || str.contains("MIT,")
+						|| str.contains(",MIT") || str.toLowerCase().contains(labname.toLowerCase())
+						|| str.toLowerCase().contains("whitehead"))
 				&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
 						|| str.toLowerCase().contains("biology") || str.toLowerCase().contains("biological")
-						|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical"));
+						|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical")
+						|| str.toLowerCase().contains("chemical") || str.toLowerCase().contains("cancer"));
+
 		return iMatch2;
 	}
 
 	public static boolean iFunctionMatch3(String str, String labname) {
-		boolean iMatch3 = (str.contains("PhD") || str.contains("Ph.D"))
-				&& (str.toLowerCase().contains("Massachusetts Institute of Technology") || str.contains("MIT")
-						|| str.contains("M.I.T."))
+		boolean iMatch3 = (str.contains("PhD") || str.contains("Ph.D") || str.toLowerCase().contains("doctor")
+				|| str.contains("M.D.") || str.toLowerCase().contains("postdoctoral")
+				|| str.toLowerCase().contains("postdoc"))
 				&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
 						|| str.toLowerCase().contains("biology") || str.toLowerCase().contains("biological")
-						|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical")); 
-		// && str.toLowerCase().contains(labname);
+						|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical")
+						|| str.toLowerCase().contains("chemical") || str.toLowerCase().contains("cancer"))
+				&& (str.toLowerCase().contains(labname.toLowerCase())
+						|| str.toLowerCase().contains("whitehead"));
 
 		return iMatch3;
 	}

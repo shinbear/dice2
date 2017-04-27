@@ -9,10 +9,10 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;  
   
-public class Test extends JFrame {  
+public class Test_Linkedin extends JFrame {  
     SheThread thread = null;  
   
-    public Test() {  
+    public Test_Linkedin() {  
         try {  
             createFrame();  
             }  
@@ -53,17 +53,17 @@ public class Test extends JFrame {
             }  
         });  
         
-        Main6.run();
+        Main6_Linkedin.run();
     }  
   
     public static void main(String[] args) {  
-        new Test().show();  
+        new Test_Linkedin().show();  
     }  
   
 }  
   
-class SheThread extends Thread {  
-    public SheThread() {  
+class SheThread_Linkedin extends Thread {  
+    public SheThread_Linkedin() {  
     }  
   
     public void run() {  

@@ -13,7 +13,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -29,6 +31,7 @@ import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.io.FileUtils;
@@ -60,6 +63,8 @@ public class Main6 {
 	public static int rawID = 1;
 	public static String cliuid_2 = "";
 	public static String unedname = "";
+	public static String fname = "";
+	public static String lname = "";
 	public static String labname = "";
 	public static String search_method = "";
 	public static int rawID_Total = 0;
@@ -75,6 +80,7 @@ public class Main6 {
 	public static String fileName_final = "";
 	public static String url_temp = "";
 	public static WebClient webClient;
+	public static List<String> excel_row = new ArrayList<String>();
 
 	public static void main(String[] args) throws IOException {
 
@@ -82,14 +88,10 @@ public class Main6 {
 
 	public static void run() throws IOException {
 		try {
-			
-			
-			
 			input();
 			Sheet sheet;
 			Workbook book;
 			try {
-				// git try    
 				// delete old files to reset
 				deleteAllFilesOfDir("C:/postdoc/temp");
 				delete("C:/postdoc/result.xls");
@@ -106,10 +108,10 @@ public class Main6 {
 
 				book = Workbook.getWorkbook(new File(filename.getText()));
 				sheet = book.getSheet(0);
-				// modifyExcel("C:/postdoc/result.xls","¸Ä¹ı",0,0);
+				// modifyExcel("C:/postdoc/result.xls","Modified",0,0);
 
-				rawID_Total = sheet.getRows(); // »ñÈ¡ĞĞÊı
-				webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER_11);// ´´½¨WebClient
+				rawID_Total = sheet.getRows(); // Get Rows Count
+				webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER_11);// Â´Â´Â½Â¨WebClient
 				loginLinkedin();
 
 				for (int i = 1; i < rawID_Total; i++) {
@@ -118,9 +120,11 @@ public class Main6 {
 					createDir("C:/postdoc/temp");
 
 					// Write the ID info into xls
+					excel_row.clear();
 					modifyExcel("C:/postdoc/result.xls", cliuid_2, Excel_ID, rawID);
 					modifyExcel("C:/postdoc/result.xls", unedname, Excel_ID + 1, rawID);
 					modifyExcel("C:/postdoc/result.xls", labname, Excel_ID + 2, rawID);
+
 					modifyExcel("C:/postdoc/result_linkedin.xls", cliuid_2, Excel_ID_linkedin, rawID);
 					modifyExcel("C:/postdoc/result_linkedin.xls", unedname, Excel_ID_linkedin + 1, rawID);
 					modifyExcel("C:/postdoc/result_linkedin.xls", labname, Excel_ID_linkedin + 2, rawID);
@@ -130,8 +134,21 @@ public class Main6 {
 					ReadWriteFile.writeTxtFile(cliuid_2 + "  | " + unedname);
 
 					// Execute search program
-					initSearch(unedname, "linkedinSearch");
-					initSearch(unedname, "googleSearch");
+					// initSearch(unedname, "linkedinSearch");
+					try {
+						initSearch(unedname, "googleSearch");
+					} catch (java.lang.IllegalArgumentException e) {
+						e.printStackTrace();
+					} finally {
+						int rTime = ((int) (60 + Math.random() * (80 - 60 + 1))) * 1000;
+						try {
+							Thread.sleep(rTime);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+
 					deleteAllFilesOfDir("C:/postdoc/temp");
 					Sub_ID = 0;
 					Excel_ID = 0;
@@ -158,30 +175,30 @@ public class Main6 {
 			bingSearch(URL, unedname);
 			flag = 1;
 		} else if (engine.equals("googleSearch")) {
-			// URL = "https://www.google.com¡£hk/search?q=" + unedname + "&num=10";
-			URL = "https://www.google.com/search?q=massachusetts+institute+of+technolog+site:linkedin.com+intitle:\""
-					+ unedname.replace(" ", "%20") + "\"+OR+inurl:\"" + unedname.replace(" ", "%20") + "\"";
-			
-			
+			/*
+			 * URL = "https://www.google.com/search?q=allintitle:\"" +
+			 * unedname.replace(" ", "+") + "\"+OR+allinurl:\"" +
+			 * unedname.replace(" ", "+") + "\"";
+			 */
+			URL = "https://www.google.com/search?q=mit+allintitle:(" + unedname + ")+OR+allinurl:(" + unedname + ")";
+
+			URL url = new URL(URL);
+			URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), null);
+
 			cliuid_2_unedname = str_trim.substring(0, 4 - cliuid_2.length()) + cliuid_2 + "_" + unedname;
-			dirName = "c:/postdoc/" + cliuid_2_unedname;
-			createDir(dirName);
-			googleSearch(URL, unedname);
+			// dirName = "c:/postdoc/" + cliuid_2_unedname;
+			// createDir(dirName);
+			System.out.println(URL);
+			googleSearch(uri.toString(), unedname);
+			/*
+			 * if (Excel_ID == 0) { int rTime = ((int) (80 + Math.random() * (80
+			 * - 60 + 1))) * 1000; try { Thread.sleep(rTime); } catch
+			 * (InterruptedException e1) { // TODO Auto-generated catch block
+			 * e1.printStackTrace(); } URL = "https://www.google.com/search?q=("
+			 * + unedname + ")+" + labname; googleSearch(uri.toString(),
+			 * unedname); }
+			 */
 			flag = 2;
-			
-			URL = "https://www.google.com/search?q=massachusetts+institute+of+technolog+allintitle:" + 
-					   unedname.replace(" ", "%20")+"+OR+allinurl:"+ unedname.replace(" ", "%20");
-						cliuid_2_unedname = str_trim.substring(0, 4 - cliuid_2.length()) + cliuid_2 + "_" + unedname;
-						// dirName = "c:/postdoc/" + cliuid_2_unedname;
-						// createDir(dirName);
-						System.out.println(URL);
-						googleSearch(URL, unedname);
-						if (Excel_ID == 0) {
-							URL = "https://www.google.com/search?q="+labname.replace(" ", "%20")+"allintitle:" + 
-									   unedname.replace(" ", "%20")+"+OR+allinurl:"+ unedname.replace(" ", "%20");
-							googleSearch(URL, unedname);
-			
-						}
 		} else if (engine.equals("linkedinSearch")) {
 			URL = "https://www.linkedin.com/search/results/index/?keywords=" + unedname
 					+ "&origin=GLOBAL_SEARCH_HEADER";
@@ -215,7 +232,7 @@ public class Main6 {
 			webClient.getOptions().setJavaScriptEnabled(false);
 			webClient.getOptions().setCssEnabled(false);
 			// Get webpage
-			HtmlPage page = webClient.getPage("https://www.linkedin.com/uas/login"); // open linkedin
+			HtmlPage page = webClient.getPage("https://www.linkedin.com/uas/login"); // Â´Ã²Â¿Âªlinkedin
 
 			// Get html element "session_key"
 			HtmlElement usernameEle = page.getElementByName("session_key");
@@ -232,6 +249,12 @@ public class Main6 {
 			HtmlElement submitEle = page.getElementByName("signin");
 			// Click login
 			page = submitEle.click();
+			String result = page.asXml();// Get the html page of click()
+			if (!result.contains("feed-tab-icon")) {
+				System.out.println("***********Login Linkedin Fail*********");
+				ReadWriteFile.readTxtFile();
+				ReadWriteFile.writeTxtFile("***********Login Linkedin Fail*********");
+			}
 		} catch (
 
 		FailingHttpStatusCodeException e) {
@@ -245,6 +268,8 @@ public class Main6 {
 	}
 
 	public static void linkedinSearch(String URL) throws IOException {
+		// login linkedin
+		loginLinkedin();
 		// write log
 		ReadWriteFile.readTxtFile();
 		ReadWriteFile.writeTxtFile("          linkedinSearch- " + URL);
@@ -308,7 +333,9 @@ public class Main6 {
 	}
 
 	public static void googleSearch(String URL1, String unedname) throws IOException {
-		Document doc = Jsoup.connect(URL1).timeout(0).get();
+		String html = getUrlHtmlByHttpClient(URL1);
+		Document doc = Jsoup.parse(html);
+		// Document doc = Jsoup.connect(URL1).timeout(0).get();
 		Element body = doc.body();
 		Elements content = body.getElementsByClass("r");
 		for (int i = 0; i < content.size(); i++) {
@@ -319,6 +346,7 @@ public class Main6 {
 				for (Element link : links) {
 					String linkHref = link.attr("href");
 					try {
+						linkHref = linkHref.substring(0, linkHref.indexOf("&")).replace("/url?q=", "");
 						processLinkedin(linkHref, 0);
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
@@ -330,6 +358,7 @@ public class Main6 {
 				for (Element link : links) {
 					String linkHref = link.attr("href");
 					try {
+						linkHref = linkHref.substring(0, linkHref.indexOf("&")).replace("/url?q=", "");
 						getCV(linkHref);
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
@@ -400,15 +429,31 @@ public class Main6 {
 			load.beginToLoad(downloadTask, 90000, TimeUnit.MILLISECONDS);
 
 			System.out.println("PDFMainpage- " + URL);
-
-			// read the content
-			String strContent = readPdf(pdf_temp);
+			String strContent = "";
+			try {
+				// read the content
+				strContent = readPdf(pdf_temp);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			String strContent_200 = "";
+			if (strContent.length() > 201) {
+				strContent_200 = strContent.substring(0, 200);
+			} else {
+				strContent_200 = strContent;
+			}
 
 			// if the condition is satisfied, then keep the file OR delete
 			// if (iFunctionMatch(strContent)) {
 			////////////
-			if (iFunctionMatch1(strContent)) {
-				copyFile(pdf_temp, url_temp);
+			if (iFunctionMatch1(strContent) && strContent_200.toLowerCase().contains(fname.toLowerCase())
+					&& strContent_200.toLowerCase().contains(lname.toLowerCase())) {
+				try {
+					copyFile(pdf_temp, url_temp);
+					modifyExcel("C:/postdoc/result.xls", "Yes", 3, rawID);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 
 		} else {
@@ -424,59 +469,87 @@ public class Main6 {
 				// iMatch method to check if including sensitive content
 				System.out.println("normalewebpage- " + URL);
 
+				boolean iFunctionMatch2 = iFunctionMatch2(str);
 				boolean iFunctionMatch3 = iFunctionMatch3(str, labname);
 				////////////
-				if (iFunctionMatch3) {
-					// write the result into xls
-					modifyExcel("C:/postdoc/result.xls", URL, 3 + Excel_ID, rawID);
-					// writefile(filePath(""), doc.toString(), false);
-					Sub_ID++;
-					Excel_ID++;
+				if (iFunctionMatch2) {
+					if (!excel_row.contains(URL)) {
+						// write the result into xls
+						modifyExcel("C:/postdoc/result.xls", URL, 4 + Excel_ID, rawID);
+						// writefile(filePath(""), doc.toString(), false);
+						excel_row.add(URL);
+						Sub_ID++;
+						Excel_ID++;
+					}
+				} else if (iFunctionMatch3) {
+					if (!excel_row.contains(URL)) {
+						// write the result into xls
+						modifyExcel("C:/postdoc/result.xls", URL, 4 + Excel_ID, rawID);
+						// writefile(filePath(""), doc.toString(), false);
+						excel_row.add(URL);
+						Sub_ID++;
+						Excel_ID++;
+					}
 
-					Elements links = body.getElementsByTag("a");
-					for (Element link : links) {
-						String regEx = "(download\\s*CV)|(download\\s*C.V.)|resume|CV|C.V.|(View/Download C.V.)|(Curriculum Vitae)";
-						// ±àÒëÕıÔò±í´ïÊ½-ºöÂÔ´óĞ¡Ğ´µÄĞ´·¨
-						Pattern pattern = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE);
-						Matcher matcher = pattern.matcher(link.text());
-						while (matcher.find()) {
-							String linkHref = link.attr("href");
+				}
 
-							if (linkHref.substring((linkHref.length() - 4), linkHref.length()).equals(".pdf")) {
-								// Check if it is a relative path
-								linkHref = processDLURL(URL, linkHref);
+				Elements links = body.getElementsByTag("a");
+				for (Element link : links) {
+					String regEx = "(download\\s*CV)|(download\\s*C.V.)|resume|CV|C.V.|(View/Download C.V.)|(Curriculum Vitae)";
+					// Â±Ã Ã’Ã«Ã•Ã½Ã”Ã²Â±Ã­Â´Ã¯ÃŠÂ½-ÂºÃ¶Ã‚Ã”Â´Ã³ÃÂ¡ÃÂ´ÂµÃ„ÃÂ´Â·Â¨
+					Pattern pattern = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE);
+					Matcher matcher = pattern.matcher(link.text());
+					while (matcher.find()) {
+						String linkHref = link.attr("href");
 
-								// write log
-								ReadWriteFile.readTxtFile();
-								ReadWriteFile.writeTxtFile("          inner pdf- " + linkHref);
+						if (linkHref.substring((linkHref.length() - 4), linkHref.length()).equals(".pdf")) {
+							// Check if it is a relative path
+							linkHref = processDLURL(URL, linkHref);
 
-								url_temp = getDir() + "/"
-										+ linkHref.substring(linkHref.lastIndexOf("/") + 1, linkHref.length());
+							// write log
+							ReadWriteFile.readTxtFile();
+							ReadWriteFile.writeTxtFile("          inner pdf- " + linkHref);
 
-								String pdf_temp = "C:/postdoc/temp" + "/"
-										+ URL.substring(URL.lastIndexOf("/") + 1, URL.length());
+							url_temp = getDir() + "/"
+									+ linkHref.substring(linkHref.lastIndexOf("/") + 1, linkHref.length());
 
-								LoadSomething load = new LoadSomething();
-								DownloadTask downloadTask = new DownloadTask(linkHref, "C:/postdoc/temp");
-								// Start download, duration 90000 ms
-								load.beginToLoad(downloadTask, 90000, TimeUnit.MILLISECONDS);
-								System.out.print("inner pdf- " + linkHref);
+							String pdf_temp = "C:/postdoc/temp" + "/"
+									+ linkHref.substring(linkHref.lastIndexOf("/") + 1, linkHref.length());
 
-								// read the content
-								String strContent = readPdf(url_temp);
+							LoadSomething load = new LoadSomething();
+							DownloadTask downloadTask = new DownloadTask(linkHref, "C:/postdoc/temp");
+							// Start download, duration 90000 ms
+							load.beginToLoad(downloadTask, 90000, TimeUnit.MILLISECONDS);
+							System.out.print("inner pdf- " + linkHref);
 
-								// if the condition is satisfied, then keep the
-								// file OR delete
-								/// if (iFunctionMatch1(strContent)) {
-								/////////////////
-								if (iFunctionMatch1(strContent)) {
-									copyFile(pdf_temp, url_temp);
-								}
+							// read the content
+							String strContent = readPdf(pdf_temp);
+							String strContent_200 = "";
+							if (strContent.length() > 201) {
+								strContent_200 = strContent.substring(0, 200);
+							} else {
+								strContent_200 = strContent;
 							}
 
+							// if the condition is satisfied, then keep the
+							// file OR delete
+							/// if (iFunctionMatch1(strContent)) {
+							/////////////////
+							if (iFunctionMatch1(strContent)
+									&& strContent_200.toLowerCase().contains(fname.toLowerCase())
+									&& strContent_200.toLowerCase().contains(lname.toLowerCase())) {
+								try {
+									copyFile(pdf_temp, url_temp);
+									modifyExcel("C:/postdoc/result.xls", "Yes", 3, rawID);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
 						}
+
 					}
 				}
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -485,6 +558,8 @@ public class Main6 {
 	}
 
 	public static void processLinkedin(String URL, int flag) throws IOException, SQLException {
+		// login linedin
+		loginLinkedin();
 		if (flag == 0) {
 			// write log
 			ReadWriteFile.readTxtFile();
@@ -512,11 +587,14 @@ public class Main6 {
 				////////////////
 				if (iFunctionMatch2) {
 					if (flag == 0) {
-						modifyExcel("C:/postdoc/result.xls", URL, 3 + Excel_ID, rawID);
-						Excel_ID++;
-						Sub_ID++;
+						if (!excel_row.contains(URL)) {
+							modifyExcel("C:/postdoc/result.xls", URL, 4 + Excel_ID, rawID);
+							excel_row.add(URL);
+							Excel_ID++;
+							Sub_ID++;
+						}
 					} else if (flag == 1) {
-						modifyExcel("C:/postdoc/result_linkedin.xls", URL, 3 + Excel_ID_linkedin, rawID);
+						modifyExcel("C:/postdoc/result_linkedin.xls", URL, 4 + Excel_ID_linkedin, rawID);
 						Sub_ID++;
 						Excel_ID_linkedin++;
 					}
@@ -540,12 +618,12 @@ public class Main6 {
 				 * { // TODO Auto-generated catch block e.printStackTrace(); }
 				 */
 
-				// ´´½¨Ä¿Â¼
+				// Create Folder
 				// str_m=str_trim.substring(0,
 				// 4-cliuid_2.length())+cliuid_2;
 				// writefile("c:/1.txt", background_text.toString(), false);
 			} else {
-				System.out.println("Login Fail");
+				System.out.println("linkedin login fail");
 			}
 
 		} catch (FailingHttpStatusCodeException e) {
@@ -557,7 +635,7 @@ public class Main6 {
 		}
 	}
 
-	// ÏòÎÄ±¾ÎÄ¼şÖĞĞ´ÈëÄÚÈİ
+	// Write content into text file
 	public static void writefile(String path, String content, boolean append) {
 		BufferedReader bufread;
 		BufferedWriter bufwriter;
@@ -565,18 +643,18 @@ public class Main6 {
 		String filepath, filecontent, read;
 		String readStr = "";
 		try {
-			boolean addStr = append; // Í¨¹ıÕâ¸ö¶ÔÏóÀ´ÅĞ¶ÏÊÇ·ñÏòÎÄ±¾ÎÄ¼şÖĞ×·¼ÓÄÚÈİ
-			filepath = path; // µÃµ½ÎÄ±¾ÎÄ¼şµÄÂ·¾¶
-			filecontent = content; // ĞèÒªĞ´ÈëµÄÄÚÈİ
+			boolean addStr = append; // é€šè¿‡è¿™ä¸ªå¯¹è±¡æ¥åˆ¤æ–­æ˜¯å¦å‘æ–‡æœ¬æ–‡ä»¶ä¸­è¿½åŠ å†…å®¹
+			filepath = path; // å¾—åˆ°æ–‡æœ¬æ–‡ä»¶çš„è·¯å¾„
+			filecontent = content; // éœ€è¦å†™å…¥çš„å†…å®¹
 			writefile = new File(filepath);
-			if (writefile.exists() == false) // Èç¹ûÎÄ±¾ÎÄ¼ş²»´æÔÚÔò´´½¨Ëü
+			if (writefile.exists() == false) // å¦‚æœæ–‡æœ¬æ–‡ä»¶ä¸å­˜åœ¨åˆ™åˆ›å»ºå®ƒ
 			{
 				writefile.createNewFile();
-				writefile = new File(filepath); // ÖØĞÂÊµÀı»¯
+				writefile = new File(filepath); // é‡æ–°å®ä¾‹åŒ–
 			}
 			FileWriter filewriter = new FileWriter(writefile, addStr);
-			// É¾³ıÔ­ÓĞÎÄ¼şµÄÄÚÈİ
-			// Ğ´ÈëĞÂµÄÎÄ¼şÄÚÈİ
+			// åˆ é™¤åŸæœ‰æ–‡ä»¶çš„å†…å®¹
+			// å†™å…¥æ–°çš„æ–‡ä»¶å†…å®¹
 			writefile.delete();
 			filewriter.write(filecontent);
 			filewriter.flush();
@@ -595,7 +673,7 @@ public class Main6 {
 		if (!destDirName.endsWith(File.separator)) {
 			destDirName = destDirName + File.separator;
 		}
-		// ´´½¨Ä¿Â¼
+		// Create Folder
 		if (dir.mkdirs()) {
 			System.out.println("Create folder: " + destDirName + " OK!");
 			return true;
@@ -606,16 +684,16 @@ public class Main6 {
 	}
 
 	/**
-	 * É¾³ıÎÄ¼ş£¬¿ÉÒÔÊÇÎÄ¼ş»òÎÄ¼ş¼Ğ
+	 * åˆ é™¤æ–‡ä»¶ï¼Œå¯ä»¥æ˜¯æ–‡ä»¶æˆ–æ–‡ä»¶å¤¹
 	 * 
 	 * @param fileName
-	 *            ÒªÉ¾³ıµÄÎÄ¼şÃû
-	 * @return É¾³ı³É¹¦·µ»Øtrue£¬·ñÔò·µ»Øfalse
+	 *            è¦åˆ é™¤çš„æ–‡ä»¶å
+	 * @return åˆ é™¤æˆåŠŸè¿”å›trueï¼Œå¦åˆ™è¿”å›false
 	 */
 	public static boolean delete(String fileName) {
 		File file = new File(fileName);
 		if (!file.exists()) {
-			System.out.println("Delete Fail: " + fileName + " No exists£¡");
+			System.out.println("Delete Fail: " + fileName + " No existsï¼");
 			return false;
 		} else {
 			if (file.isFile())
@@ -625,18 +703,18 @@ public class Main6 {
 	}
 
 	/**
-	 * É¾³ıµ¥¸öÎÄ¼ş
+	 * åˆ é™¤å•ä¸ªæ–‡ä»¶
 	 * 
 	 * @param fileName
-	 *            ÒªÉ¾³ıµÄÎÄ¼şµÄÎÄ¼şÃû
-	 * @return µ¥¸öÎÄ¼şÉ¾³ı³É¹¦·µ»Øtrue£¬·ñÔò·µ»Øfalse
+	 *            è¦åˆ é™¤çš„æ–‡ä»¶çš„æ–‡ä»¶å
+	 * @return å•ä¸ªæ–‡ä»¶åˆ é™¤æˆåŠŸè¿”å›trueï¼Œå¦åˆ™è¿”å›false
 	 */
 	public static boolean deleteFile(String fileName) {
 		File file = new File(fileName);
-		// Èç¹ûÎÄ¼şÂ·¾¶Ëù¶ÔÓ¦µÄÎÄ¼ş´æÔÚ£¬²¢ÇÒÊÇÒ»¸öÎÄ¼ş£¬ÔòÖ±½ÓÉ¾³ı
+		// å¦‚æœæ–‡ä»¶è·¯å¾„æ‰€å¯¹åº”çš„æ–‡ä»¶å­˜åœ¨ï¼Œå¹¶ä¸”æ˜¯ä¸€ä¸ªæ–‡ä»¶ï¼Œåˆ™ç›´æ¥åˆ é™¤
 		if (file.exists() && file.isFile()) {
 			if (file.delete()) {
-				System.out.println("Delete single file: " + fileName + " OK£¡");
+				System.out.println("Delete single file: " + fileName + " OKï¼");
 				return true;
 			} else {
 				System.out.println("Delete single file: " + fileName + " Fail!");
@@ -653,7 +731,7 @@ public class Main6 {
 		cliuid_2_unedname = str_trim.substring(0, 4 - cliuid_2.length()) + cliuid_2 + "_" + unedname;
 		dirName = "c:/postdoc/" + cliuid_2_unedname;
 		createDir(dirName);
-		// ´´½¨ÎÄ¼ş
+		// Create File
 		if (site.equals("")) {
 			filepath = dirName + "/" + cliuid_2_unedname + "_" + Sub_ID + ".html";
 		} else {
@@ -672,21 +750,25 @@ public class Main6 {
 	}
 
 	public static void readExcel(Sheet sheet, int rawID) {
-		Cell cell1, cell2, cell6;
+		Cell cell1, cell2, cell7, cell3, cell5;
 		// System.out.println("*****");
 		try {
-			// »ñÈ¡Ã¿Ò»ĞĞµÄµ¥Ôª¸ñ
-			cell1 = sheet.getCell(0, rawID);// £¨ÁĞ£¬ĞĞ£©
+			// è·å–æ¯ä¸€è¡Œçš„å•å…ƒæ ¼
+			cell1 = sheet.getCell(0, rawID);// ï¼ˆåˆ—ï¼Œè¡Œï¼‰
 			cell2 = sheet.getCell(1, rawID);
-			cell6 = sheet.getCell(6, rawID);
+			cell3 = sheet.getCell(2, rawID);
+			cell5 = sheet.getCell(4, rawID);
+			cell7 = sheet.getCell(6, rawID);
 
-			if ("".equals(cell1.getContents()) != true) // Èç¹û¶ÁÈ¡µÄÊı¾İÎª¿Õ
+			if ("".equals(cell1.getContents()) != true) // ÃˆÃ§Â¹Ã»Â¶ÃÃˆÂ¡ÂµÃ„ÃŠÃ½Â¾ÃÃÂªÂ¿Ã•
 			{
 				cliuid_2 = cell1.getContents();
 				unedname = cell2.getContents();
-				labname = cell6.getContents();
+				fname = cell3.getContents();
+				lname = cell5.getContents();
+				labname = cell7.getContents();
 				System.out.println(
-						rawID + " " + cell1.getContents() + " " + cell2.getContents() + " " + cell6.getContents());
+						rawID + " " + cell1.getContents() + " " + cell2.getContents() + " " + cell7.getContents());
 			}
 
 		} catch (Exception e) {
@@ -695,24 +777,24 @@ public class Main6 {
 
 	public static void createExcel(String filepath) {
 		try {
-			// ´ò¿ªÎÄ¼ş
+			// æ‰“å¼€æ–‡ä»¶
 			WritableWorkbook book = Workbook.createWorkbook(new File(filepath));
 
-			// Éú³ÉÃûÎª¡°µÚÒ»Ò³¡±µÄ¹¤×÷±í£¬²ÎÊı0±íÊ¾ÕâÊÇµÚÒ»Ò³
+			// ç”Ÿæˆåä¸ºâ€œç¬¬ä¸€é¡µâ€çš„å·¥ä½œè¡¨ï¼Œå‚æ•°0è¡¨ç¤ºè¿™æ˜¯ç¬¬ä¸€é¡µ
 			WritableSheet sheet = book.createSheet("sheet0", 0);
 
-			// ÔÚLabel¶ÔÏóµÄ¹¹Ôì×ÓÖĞÖ¸Ãûµ¥Ôª¸ñÎ»ÖÃÊÇµÚÒ»ÁĞµÚÒ»ĞĞ(0,0)
+			// åœ¨Labelå¯¹è±¡çš„æ„é€ å­ä¸­æŒ‡åå•å…ƒæ ¼ä½ç½®æ˜¯ç¬¬ä¸€åˆ—ç¬¬ä¸€è¡Œ(0,0)
 			Label label1 = new Label(0, 0, "cliuid_2");
 			Label label2 = new Label(1, 0, "unedname");
 			Label label3 = new Label(2, 0, "labname");
-			Label label4 = new Label(3, 0, "Address1");
-			Label label5 = new Label(4, 0, "Address2");
-			Label label6 = new Label(5, 0, "Address3");
-			Label label7 = new Label(6, 0, "Address4");
-			Label label8 = new Label(7, 0, "Address5");
-			Label label9 = new Label(8, 0, "Address6");
+			Label label4 = new Label(3, 0, "PDF-Flag");
+			Label label5 = new Label(4, 0, "Address1");
+			Label label6 = new Label(5, 0, "Address2");
+			Label label7 = new Label(6, 0, "Address3");
+			Label label8 = new Label(7, 0, "Address4");
+			Label label9 = new Label(8, 0, "Address5");
 
-			// ½«¶¨ÒåºÃµÄµ¥Ôª¸ñÌí¼Óµ½¹¤×÷±íÖĞ
+			// å°†å®šä¹‰å¥½çš„å•å…ƒæ ¼æ·»åŠ åˆ°å·¥ä½œè¡¨ä¸­
 			sheet.addCell(label1);
 			sheet.addCell(label2);
 			sheet.addCell(label3);
@@ -723,7 +805,7 @@ public class Main6 {
 			sheet.addCell(label8);
 			sheet.addCell(label9);
 
-			// Ğ´ÈëÊı¾İ²¢¹Ø±ÕÎÄ¼ş
+			// å†™å…¥æ•°æ®å¹¶å…³é—­æ–‡ä»¶
 			book.write();
 			book.close();
 		} catch (Exception e) {
@@ -736,12 +818,12 @@ public class Main6 {
 		try {
 			Workbook wb = Workbook.getWorkbook(f);//
 			WritableWorkbook book = wb.createWorkbook(f, wb);
-			// Sheet sheet = wb.getSheet(0); // »ñµÃµÚÒ»¸ö¹¤×÷±í¶ÔÏó
+			// Sheet sheet = wb.getSheet(0); // è·å¾—ç¬¬ä¸€ä¸ªå·¥ä½œè¡¨å¯¹è±¡
 			WritableSheet st = book.getSheet(0);
 			Cell cel = st.getCell(0, 0);
 			if (cel.getType() == CellType.LABEL) {
 				Label label = new Label(x, y, modContent);
-				// Yes ÊÇĞèÒªÌî³äµ¥Ôª¸ñµÄÄÚÈİ
+				// Yes æ˜¯éœ€è¦å¡«å……å•å…ƒæ ¼çš„å†…å®¹
 				st.addCell(label);
 			}
 
@@ -796,34 +878,65 @@ public class Main6 {
 		boolean iMatch1 = (str.toLowerCase().contains("curriculum vitae") || str.toLowerCase().contains("resume")
 				|| str.contains("CV") || str.toLowerCase().contains("biography")
 				|| str.toLowerCase().contains("education"))
-				&& (str.contains("PhD") || str.contains("Ph.D"))
-				&& (str.toLowerCase().contains("Massachusetts Institute of Technology") || str.contains("MIT")
-						|| str.contains("M.I.T."))
-				&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
-						|| str.toLowerCase().contains("biology") || str.toLowerCase().contains("biological")
-						|| str.toLowerCase().contains("chemistry"));
+				&& (str.contains("PhD") || str.contains("Ph.D") || str.toLowerCase().contains("doctor")
+						|| str.contains("M.D.") || str.toLowerCase().contains("postdoctoral")
+						|| str.toLowerCase().contains("postdoc"))
+				&& (str.toLowerCase().contains("massachusetts institute of technology") || str.contains("MIT,")
+						|| str.contains(",MIT") || str.contains("M.I.T.") || str.contains("MIT ")
+						|| str.toLowerCase().contains(labname.toLowerCase()) || str.toLowerCase().contains("whitehead")
+						|| str.toLowerCase().contains("mass inst technol"))
+				|| str.toLowerCase().contains("massachusetts institute of biology")
+						&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
+								|| str.toLowerCase().contains("biology") || str.toLowerCase().contains("biological")
+								|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical")
+								|| str.toLowerCase().contains("chemical") || str.toLowerCase().contains("cancer"));
 		return iMatch1;
 	}
 
 	public static boolean iFunctionMatch2(String str) {
-		boolean iMatch2 = (str.contains("PhD") || str.contains("Ph.D"))
-				&& (str.toLowerCase().contains("Massachusetts Institute of Technology") || str.contains("MIT")
-						|| str.contains("M.I.T."))
+		boolean iMatch2 = (str.contains("PhD") || str.contains("Ph.D") || str.toLowerCase().contains("doctor")
+				|| str.contains("M.D.") || str.toLowerCase().contains("postdoctoral")
+				|| str.toLowerCase().contains("postdoc"))
+				&& (str.toLowerCase().contains("massachusetts institute of technology") || str.contains(" MIT")
+						|| str.contains("M.I.T.") || str.contains("MIT ") || str.contains("MIT,")
+						|| str.contains(",MIT") || str.toLowerCase().contains(labname.toLowerCase())
+						|| str.toLowerCase().contains("whitehead"))
 				&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
 						|| str.toLowerCase().contains("biology") || str.toLowerCase().contains("biological")
-						|| str.toLowerCase().contains("chemistry"));
+						|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical")
+						|| str.toLowerCase().contains("chemical") || str.toLowerCase().contains("cancer"));
+
 		return iMatch2;
 	}
 
 	public static boolean iFunctionMatch3(String str, String labname) {
-		boolean iMatch3 = (str.contains("PhD") || str.contains("Ph.D"))
-				&& (str.toLowerCase().contains("Massachusetts Institute of Technology") || str.contains("MIT")
-						|| str.contains("M.I.T."))
+		boolean iMatch3 = (str.contains("PhD") || str.contains("Ph.D") || str.toLowerCase().contains("doctor")
+				|| str.contains("M.D.") || str.toLowerCase().contains("postdoctoral")
+				|| str.toLowerCase().contains("postdoc"))
 				&& (str.toLowerCase().contains("biotechnology") || str.toLowerCase().contains("medicine")
 						|| str.toLowerCase().contains("biology") || str.toLowerCase().contains("biological")
-						|| str.toLowerCase().contains("chemistry"))
-				&& str.toLowerCase().contains(labname);
+						|| str.toLowerCase().contains("chemistry") || str.toLowerCase().contains("medical")
+						|| str.toLowerCase().contains("chemical") || str.toLowerCase().contains("cancer"))
+				&& (str.toLowerCase().contains(labname.toLowerCase()) || str.toLowerCase().contains("whitehead"));
+
 		return iMatch3;
+	}
+
+	public static String identifMaxStr(String str) {
+		// String str = "A. Hughes Goldie Waverly Ding A. Raymond Frackelton,
+		// Jr.";
+		String[] strs = str.split("[.,\\s+]");
+		String strMax = "";
+		int maxNum = 0;
+		for (String s : strs) {
+			if (s.length() > maxNum) {
+				maxNum = s.length();
+				strMax = s;
+				// System.out.println(maxNum);
+			}
+		}
+		return strMax;
+
 	}
 
 	// check if the result links are special websites
@@ -863,23 +976,23 @@ public class Main6 {
 		File pdfFile = new File(URL);
 		PDDocument document = null;
 		try {
-			// ·½Ê½Ò»£º
+			// æ–¹å¼ä¸€ï¼š
 			/**
 			 * InputStream input = null; input = new FileInputStream( pdfFile );
-			 * //¼ÓÔØ pdf ÎÄµµ PDFParser parser = new PDFParser(new
+			 * //åŠ è½½ pdf æ–‡æ¡£ PDFParser parser = new PDFParser(new
 			 * RandomAccessBuffer(input)); parser.parse(); document =
 			 * parser.getPDDocument();
 			 **/
 
-			// ·½Ê½¶ş£º
+			// æ–¹å¼äºŒï¼š
 			document = PDDocument.load(pdfFile);
 
-			// »ñÈ¡Ò³Âë
+			// è·å–é¡µç 
 			int pages = document.getNumberOfPages();
 
-			// ¶ÁÎÄ±¾ÄÚÈİ
+			// è¯»æ–‡æœ¬å†…å®¹
 			PDFTextStripper stripper = new PDFTextStripper();
-			// ÉèÖÃ°´Ë³ĞòÊä³ö
+			// è®¾ç½®æŒ‰é¡ºåºè¾“å‡º
 			stripper.setSortByPosition(true);
 			stripper.setStartPage(1);
 			stripper.setEndPage(pages);
@@ -898,13 +1011,13 @@ public class Main6 {
 			int bytesum = 0;
 			int byteread = 0;
 			File oldfile = new File(oldPath);
-			if (oldfile.exists()) { // ÎÄ¼ş´æÔÚÊ±
-				InputStream inStream = new FileInputStream(oldPath); // ¶ÁÈëÔ­ÎÄ¼ş
+			if (oldfile.exists()) { // æ–‡ä»¶å­˜åœ¨æ—¶
+				InputStream inStream = new FileInputStream(oldPath); // Â¶ÃÃˆÃ«Ã”Â­ÃÃ„Â¼Ã¾
 				FileOutputStream fs = new FileOutputStream(newPath);
 				byte[] buffer = new byte[1444];
 				int length;
 				while ((byteread = inStream.read(buffer)) != -1) {
-					bytesum += byteread; // ×Ö½ÚÊı ÎÄ¼ş´óĞ¡
+					bytesum += byteread; // å­—èŠ‚æ•° æ–‡ä»¶å¤§å°
 					System.out.println(bytesum);
 					fs.write(buffer, 0, byteread);
 				}
@@ -932,9 +1045,9 @@ public class Main6 {
 		}
 		path.delete();
 	}
-	
-	//Get the search result html from google engine
-	public String getUrlHtmlByHttpClient(String url) {
+
+	// Get the search result html from google engine
+	public static String getUrlHtmlByHttpClient(String url) {
 		String searchHtml = null;
 		HttpClient httpClient = new HttpClient();
 		httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
@@ -944,12 +1057,17 @@ public class Main6 {
 		try {
 			int statusCode = httpClient.executeMethod(getMethod);
 			if (statusCode != HttpStatus.SC_OK) {
-				System.err.println("Method failed: " + getMethod.getStatusLine());
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// è®¾ç½®æ—¥æœŸæ ¼å¼
+				System.out.println(df.format(new Date()));// new Date()ä¸ºè·å–å½“å‰ç³»ç»Ÿæ—¶é—´
+				System.err.println(df.format(new Date()) + "  --Method failed: " + getMethod.getStatusLine());
+				ReadWriteFile.readTxtFile();
+				ReadWriteFile.writeTxtFile(df.format(new Date()) + "  --Method failed: " + getMethod.getStatusLine());
 			}
+
 			InputStream bodyIs = getMethod.getResponseBodyAsStream();//
 			System.out.println("get reoponse body stream:" + bodyIs);
 
-			// Èç¹ûÖĞÎÄÂÒÂë ĞŞ¸Ä×Ö·û¼¯
+			// å¦‚æœä¸­æ–‡ä¹±ç  ä¿®æ”¹å­—ç¬¦é›†
 			// BufferedReader br = new BufferedReader(
 			// new InputStreamReader(bodyIs,"GBK"));
 			BufferedReader br = new BufferedReader(new InputStreamReader(bodyIs));
