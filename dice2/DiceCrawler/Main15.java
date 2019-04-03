@@ -50,8 +50,10 @@ public class Main15 {
 	public static String[] compseg = { "Recruiter", "DirectHire", "None" };
 	public static String[] r = { "30", "5", "10", "20", "40", "50", "75", "100" };
 	public static String[] emptype = { "Full Time", "Part Time", "Contracts", "Third Party", "None" };
+	public static String[] compsim = { "Y", "N" };
 	public static JComboBox combo1 = new JComboBox(emptype);
 	public static JComboBox combo2 = new JComboBox(compseg);
+	public static JComboBox combo3 = new JComboBox(compsim);
 	public static JComboBox comborad = new JComboBox(r);
 	public static JFrame frame = new JFrame();
 	public static PrintWriter writer;
@@ -190,6 +192,8 @@ public class Main15 {
 		panel.add(combo1);
 		panel.add(new JLabel("Company Segment:"));
 		panel.add(combo2);
+		panel.add(new JLabel("Similar Position?:"));
+		panel.add(combo3);
 		panel.add(new JLabel("File path to store results (without extention):"));
 		panel.add(filename);
 
@@ -320,14 +324,16 @@ public class Main15 {
 				// If it is 1st sub page, then get the similar position link and
 				// parse them
 				if (flag == 1) {
-					for (Element sim_pos_link : doc_sub.select(".mTB10")) {
-						sim_position_link = "https://www.dice.com"+sim_pos_link.select("a").attr("href");
-						// process the similar job page
-						if (sim_position_link != "https://www.dice.com/"
-								&& sim_position_link != "https://www.dice.com") {
-							sim_row++;
-							dataProgress.setPanel(total, page, row, sim_row);
-							processPage(sim_position_link, 2);
+					if (combo3.getSelectedItem().toString() == "Y") {
+						for (Element sim_pos_link : doc_sub.select(".mTB10")) {
+							sim_position_link = "https://www.dice.com" + sim_pos_link.select("a").attr("href");
+							// process the similar job page
+							if (sim_position_link != "https://www.dice.com/"
+									&& sim_position_link != "https://www.dice.com") {
+								sim_row++;
+								dataProgress.setPanel(total, page, row, sim_row);
+								processPage(sim_position_link, 2);
+							}
 						}
 					}
 					sim_row=0;
