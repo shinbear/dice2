@@ -166,8 +166,6 @@ public class Main18 {
 			stat.executeUpdate(
 					"create table dice_company(comlink varchar," + "posiCount varchar," + "companyOverview	varchar,"
 							+ "companyWebsite varchar," + "quickFacts varchar," + "easyApply2 varchar);");
-
-			
 			
 			// count the the page number of result
 			pages = noofpages(URL);
@@ -307,16 +305,16 @@ public class Main18 {
 				// similar position page
 			} else if (flag == 1) {
 				Document doc_sub = getPageDocByHtmlunit(URL1);
-				String dice_ID = "";
-				String position_ID = "";
-				String job_Title = "";
-				String employer = "";
-				String job_desc = "";
-				String location = "";
-				String posted = "";
+				String dice_ID = "Null";
+				String position_ID = "Null";
+				String job_Title = "Null";
+				String employer = "Null";
+				String job_desc = "Null";
+				String location = "Null";
+				String posted = "Null";
 				String[] keyword = new String[4];
-				String comlink = "";
-				String sim_position_link = "";
+				String comlink = "Null";
+				String sim_position_link = "Null";
 				// comPageData[0]-posiCount, comPageData[1]-companyOverview,
 				// comPageData[2]-companyWebsite, comPageData[3]-quickFacts,
 				// comPageData[4]-easyApply2
@@ -341,15 +339,25 @@ public class Main18 {
 				// Get the employer
 				employer = doc_sub.select("span#hiringOrganizationName").first().text();
 				// Get the job desc
-				job_desc = doc_sub.select("div#jobdescSec").first().text();
+				if (doc_sub.select("div#jobdescSec").first().text() != null
+						&& !doc_sub.select("div#jobdescSec").first().text().equals("")) {
+					job_desc = doc_sub.select("div#jobdescSec").first().text();
+				}
 				// Get the location
-				location = doc_sub.select("li.location").first().text();
+				if (doc_sub.select("li.location").first().text() != null
+						&& !doc_sub.select("li.location").first().text().equals("")) {
+					location = doc_sub.select("li.location").first().text();
+				}
 				// Get the posted date
 				posted = doc_sub.select("li.posted").first().text();
 				// Get the keyword1,keyword2,keyword3,keyword4
 				int count = 0;
 				for (Element keywords_element : doc_sub.select(".iconsiblings")) {
-					keyword[count] = keywords_element.text();
+					if (keywords_element.text() != null && !keywords_element.text().equals("")) {
+						keyword[count] = keywords_element.text();
+					} else {
+						keyword[count] = "Null";
+					}
 					count++;
 				}
 				// Get the company link in Dice
@@ -403,16 +411,16 @@ public class Main18 {
 				} else {
 					easyflag = "S";
 					Document doc_sub = getPageDocByHtmlunit(URL1);
-					String dice_ID = "";
-					String position_ID = "";
-					String job_Title = "";
-					String employer = "";
-					String job_desc = "";
-					String location = "";
-					String posted = "";
+					String dice_ID = "Null";
+					String position_ID = "Null";
+					String job_Title = "Null";
+					String employer = "Null";
+					String job_desc = "Null";
+					String location = "Null";
+					String posted = "Null";
 					String[] keyword = new String[4];
-					String comlink = "";
-					String sim_position_link = "";
+					String comlink = "Null";
+					String sim_position_link = "Null";
 					// comPageData[0]-posiCount, comPageData[1]-companyOverview,
 					// comPageData[2]-companyWebsite, comPageData[3]-quickFacts,
 					// comPageData[4]-easyApply2
@@ -437,15 +445,25 @@ public class Main18 {
 					// Get the employer
 					employer = doc_sub.select("span#hiringOrganizationName").first().text();
 					// Get the job desc
-					job_desc = doc_sub.select("div#jobdescSec").first().text();
+					if (doc_sub.select("div#jobdescSec").first().text() != null
+							&& !doc_sub.select("div#jobdescSec").first().text().equals("")) {
+						job_desc = doc_sub.select("div#jobdescSec").first().text();
+					}
 					// Get the location
-					location = doc_sub.select("li.location").first().text();
+					if (doc_sub.select("li.location").first().text() != null
+							&& !doc_sub.select("li.location").first().text().equals("")) {
+						location = doc_sub.select("li.location").first().text();
+					}
 					// Get the posted date
 					posted = doc_sub.select("li.posted").first().text();
 					// Get the keyword1,keyword2,keyword3,keyword4
 					int count = 0;
 					for (Element keywords_element : doc_sub.select(".iconsiblings")) {
-						keyword[count] = keywords_element.text();
+						if (keywords_element.text() != null && !keywords_element.text().equals("")) {
+							keyword[count] = keywords_element.text();
+						} else {
+							keyword[count] = "Null";
+						}
 						count++;
 					}
 					// Get the company link in Dice
@@ -496,8 +514,8 @@ public class Main18 {
 				comPageData[0]=rs.getString(2);
 				comPageData[1]=rs.getString(3);
 				comPageData[2]=rs.getString(4);
-				comPageData[3] = "";
-				comPageData[4] = "";
+				comPageData[3] = "Null";
+				comPageData[4] = "Null";
 				ifRepeated=ifRepeated+"-C";
 				return comPageData;
 			}
@@ -507,26 +525,40 @@ public class Main18 {
 			// comPageData[2]-companyWebsite, comPageData[3]-quickFacts,
 			// comPageData[4]-easyApply2
 			String composCount_temp = doc_comOver.select("span.posiCount").text();
-			if (composCount_temp.contains("of")) {
-				composCount_temp = composCount_temp.substring(composCount_temp.indexOf("of") + 3);
-				comPageData[0] = composCount_temp;
+			if (composCount_temp != null && !composCount_temp.equals("")) {
+				if (composCount_temp.contains("of")) {
+					composCount_temp = composCount_temp.substring(composCount_temp.indexOf("of") + 3);
+					comPageData[0] = composCount_temp;
+				} else {
+					comPageData[0] = doc_comOver.select("span.posiCount").text();
+				}
 			} else {
-				comPageData[0] = doc_comOver.select("span.posiCount").text();
+				comPageData[0] = "Null";
 			}
-			comPageData[1] = doc_comOver.select(".compant-block").text();
+				
+			if (doc_comOver.select(".compant-block").text() != null
+					&& !doc_comOver.select(".compant-block").text().equals("")) {
+				comPageData[1] = doc_comOver.select(".compant-block").text();
+			}else
+			{
+				comPageData[1] = "Null";
+			}
 
 			for (Element comWebsite : doc_comOver.select(".clabel")) {
 				if (comWebsite.text().contains("Company Website")) {
-					comPageData[2] = comWebsite.attr("href");
+					if (comWebsite.text() != null && !comWebsite.text().equals("")) {
+						comPageData[2] = comWebsite.attr("href");
+					} else {
+						comPageData[2] = "Null";
+					}
 				}
 
 			}
-			comPageData[3] = "None";
-			comPageData[4] = "None";
+			comPageData[3] = "Null";
+			comPageData[4] = "Null";
 			String K = "insert into dice_company values(" + URL + ", " + comPageData[0] + ", " + comPageData[1] + ", "
 					+ comPageData[2] + ", " + comPageData[3] + ", " + comPageData[4] + ");";
-			stat.executeUpdate(K);
-			
+			stat.executeUpdate(K);			
 			return comPageData;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
