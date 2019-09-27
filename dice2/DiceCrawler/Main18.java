@@ -33,11 +33,7 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-
 import DiceCrawler.App.MyRun;
-
-
-
 public class Main18 {
 	public static int i = 0;
 	public static int j = 0;
